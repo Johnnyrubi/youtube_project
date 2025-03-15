@@ -15,6 +15,8 @@ os.makedirs(VIDEO_FOLDER, exist_ok=True)  # Garante que a pasta exista
 class VideoRequest(BaseModel):
     video_id: str
 
+
+ 
 # ✅ Endpoint que recebe o JSON corretamente
 @app.post("/download")
 async def download_video(data: VideoRequest):  # Agora FastAPI entende o corpo JSON
