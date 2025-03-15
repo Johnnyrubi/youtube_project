@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import subprocess
 import os
@@ -9,12 +10,15 @@ app = FastAPI()
 VIDEO_FOLDER = "videos"
 os.makedirs(VIDEO_FOLDER, exist_ok=True)
 
+# ✅ Servir os vídeos via HTTP
+app.mount("/videos", StaticFiles(directory=VIDEO_FOLDER), name="videos")
+
 # Modelo para o JSON recebido
 class VideoRequest(BaseModel):
     video_id: str
 
 @app.post("/download")
-async def download_video(data: VideoRequest, request: Request):  # Pegando a requisição aqui
+async def download_video(data: VideoRequest, request: Request):
     video_id = data.video_id
     youtube_url = f"https://www.youtube.com/watch?v={video_id}"
     output_path = os.path.join(VIDEO_FOLDER, f"{video_id}.mp4")
@@ -22,7 +26,7 @@ async def download_video(data: VideoRequest, request: Request):  # Pegando a req
     try:
         subprocess.run(["yt-dlp", "-f", "best", "-o", output_path, youtube_url], check=True)
         
-        # Pegando o domínio automaticamente
+        # Gerar o link correto usando o domínio do Railway
         base_url = str(request.base_url)
         video_url = f"{base_url}videos/{video_id}.mp4"
 
